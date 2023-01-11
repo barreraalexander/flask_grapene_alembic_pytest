@@ -9,9 +9,9 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, nullable=False)
-    username = Column(String(40), nullable=False)
+    name = Column(String(40), nullable=False)
     email = Column(String(40), nullable=False, unique=True)
-    password = Column(String(40), nullable=False)
+    password = Column(String(100), nullable=False)
 
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     modified_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))

@@ -20,3 +20,8 @@ SQLAlchemy==1.4.46
 tomli==2.0.1
 typing_extensions==4.4.0
 Werkzeug==2.2.2
+
+graphene==2.1.9
+graphql-core==2.3.2
+graphql-relay==2.0.1
+graphql-server-core==1.2.0
