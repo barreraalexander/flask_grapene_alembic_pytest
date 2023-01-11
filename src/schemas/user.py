@@ -3,7 +3,7 @@ from src import db, bcrypt
 from src.schemas.book import Book
 from secrets import token_hex
 from src import models
-from flask import abort
+from flask import abort, Response
 
 class User(gp.ObjectType):
     id = gp.ID(required=True)
@@ -13,6 +13,9 @@ class User(gp.ObjectType):
     verified = gp.Int()
     books = gp.List(Book)
 
+class DeleteUser(gp.ObjectType):
+    status_code = gp.Int()
+    status = gp.String()
 
 class Query(gp.ObjectType):
     user = gp.Field(User)
@@ -62,6 +65,7 @@ class CreateUser(gp.Mutation):
         db_session.add(new_user)
         db_session.commit()
         db_session.refresh(new_user)
+        db_session.close()
 
         return new_user
 
@@ -79,7 +83,6 @@ class UpdateUser(gp.Mutation):
         record_query = db_session.query(models.User).filter(models.User.id == id)
 
         record = record_query.first()
-        print (dir(record))
 
         if record == None:
             abort(404, description='Record Not Found')
@@ -92,27 +95,38 @@ class UpdateUser(gp.Mutation):
 
         record_query.update({'name' : record.name, 'email': record.email}, synchronize_session=False)
         db_session.commit()
+        updated_record = record_query.first()
+        db_session.close()
 
-        return record_query.first()
+        return updated_record
 
 class DeleteUser(gp.Mutation):
     class Arguments:
         id = gp.ID(required=True)
 
-    Output = User
+    # Output = User
+    Output = DeleteUser
 
     def mutate(root, info, id):
-        cursor = db.connection.cursor()
-        statement = "select * from users where id = '{}'".format(id)
-        cursor.execute(statement)
-        record = cursor.fetchone()
+        db_session = db.session()
 
-        delete_statement = "DELETE FROM users WHERE id = '{}' ".format(id)
+        record_query = db_session.query(models.User).filter(models.User.id == id)
 
-        cursor = db.connection.cursor()
-        cursor.execute(delete_statement)
-        db.connection.commit()
-        return record
+        record = record_query.first()
+
+        if record == None:
+            abort(404, description='Record Not Found')
+        
+        record_query.delete(synchronize_session=False)
+        db_session.commit()
+        
+        deleted_user = {
+            'status': f'Successfully Deleted User {id}',
+            'status_code': 200
+        }
+
+
+        return deleted_user
 
 class VerifyUser(gp.Mutation):
     class Arguments:
