@@ -1,9 +1,6 @@
 import graphene as gp
-from src import db, bcrypt
-from src.schemas.book import Book
-from secrets import token_hex
-from src import models
-from flask import abort, Response
+from src import db, bcrypt, models
+from flask import abort
 from datetime import datetime
 
 class User(gp.ObjectType):
@@ -14,7 +11,12 @@ class User(gp.ObjectType):
     created_at = gp.Date()
     modified_at = gp.Date()
 
-class DeleteUser(gp.ObjectType):
+
+
+# class NotFoundUser(gp.ObjectType):
+#     pass
+
+class DeleteUserObject(gp.ObjectType):
     status_code = gp.Int()
     status = gp.String()
 
@@ -51,8 +53,7 @@ class CreateUser(gp.Mutation):
 
     Output = User
 
-    def mutate(root, info, name, email,
-                password):
+    def mutate(root, info, name, email, password):
 
         user_dict = {
             'name': name,
@@ -107,8 +108,7 @@ class DeleteUser(gp.Mutation):
     class Arguments:
         id = gp.ID(required=True)
 
-    # Output = User
-    Output = DeleteUser
+    Output = DeleteUserObject
 
     def mutate(root, info, id):
         db_session = db.session()
@@ -128,7 +128,6 @@ class DeleteUser(gp.Mutation):
             'status_code': 200
         }
 
-
         return deleted_user
 
 class VerifyUser(gp.Mutation):
@@ -147,6 +146,5 @@ class Mutation(gp.ObjectType):
 
 schema = gp.Schema(
     query=Query,
-    mutation=Mutation,
-    # auto_camelcase=False
+    mutation=Mutation
 )

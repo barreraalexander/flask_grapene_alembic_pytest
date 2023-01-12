@@ -34,11 +34,13 @@ def create_app():
     from src.blueprints.graphql.routes import router as graphql_router
     # from src.schemas.book import schema as book_schema
     from src.schemas.user import schema as user_schema
-
+    from src.schemas.author import schema as author_schema
 
     app.register_blueprint(graphql_router)
     
-    app.add_url_rule('/graphiql', view_func=GraphQLView.as_view('graphql', schema=user_schema, graphiql=True))
+    # app.add_url_rule('/graphiql', view_func=GraphQLView.as_view('graphql', schema=author_schema, graphiql=True))
+    # app.add_url_rule('/graphiql', view_func=GraphQLView.as_view('graphql', schema=user_schema, graphiql=True))
+    # app.add_url_rule('/author', view_func=GraphQLView.as_view('graphql', schema=author_schema, graphiql=True))
     # print ((db.metadata.tables))
     # db.create_all()
     models.Base.metadata.create_all(bind=engine)
