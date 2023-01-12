@@ -4,14 +4,15 @@ from src.schemas.book import Book
 from secrets import token_hex
 from src import models
 from flask import abort, Response
+from datetime import datetime
 
 class User(gp.ObjectType):
     id = gp.ID(required=True)
     name = gp.String()
     email = gp.String()
     password = gp.String()
-    verified = gp.Int()
-    books = gp.List(Book)
+    created_at = gp.Date()
+    modified_at = gp.Date()
 
 class DeleteUser(gp.ObjectType):
     status_code = gp.Int()
@@ -87,13 +88,15 @@ class UpdateUser(gp.Mutation):
         if record == None:
             abort(404, description='Record Not Found')
 
+        updated_record = {}
         if name:
-            record.name = name
+            updated_record['name'] = name
 
         if email:
-            record.email = email
+            updated_record['email'] = email
 
-        record_query.update({'name' : record.name, 'email': record.email}, synchronize_session=False)
+        updated_record['modified_at'] = datetime.utcnow()
+        record_query.update(updated_record, synchronize_session=False)
         db_session.commit()
         updated_record = record_query.first()
         db_session.close()
