@@ -11,11 +11,6 @@ class User(gp.ObjectType):
     created_at = gp.Date()
     modified_at = gp.Date()
 
-
-
-# class NotFoundUser(gp.ObjectType):
-#     pass
-
 class DeleteUserObject(gp.ObjectType):
     status_code = gp.Int()
     status = gp.String()
