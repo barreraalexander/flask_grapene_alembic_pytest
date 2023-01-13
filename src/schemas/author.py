@@ -80,7 +80,6 @@ class UpdateAuthor(gp.Mutation):
         if name:
             updated_record['name'] = name
 
-
         updated_record['modified_at'] = datetime.utcnow()
         record_query.update(updated_record, synchronize_session=False)
         db_session.commit()

@@ -12,7 +12,6 @@ router = Blueprint('graphql', __name__,
 
 @router.route('/book_ep', methods=['POST', 'GET'])
 def book_ep():
-    print ('here')
     if request.method == "POST":
         data = json.loads(request.data)
         element = BookSchema.execute(data['query'])

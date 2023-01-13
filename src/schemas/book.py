@@ -1,7 +1,7 @@
 import graphene as gp
 from src import db, models
-from secrets import token_hex
-# from src.s
+from flask import abort
+from datetime import datetime
 
 class Book(gp.ObjectType):
     id = gp.ID(required=True)
@@ -11,6 +11,11 @@ class Book(gp.ObjectType):
 
     created_at = gp.Date()
     modified_at = gp.Date()
+
+class DeleteBookObject(gp.ObjectType):
+    status_code = gp.Int()
+    status = gp.String()
+
 
 class Query(gp.ObjectType):
     book = gp.Field(Book)
@@ -65,70 +70,64 @@ class UpdateBook(gp.Mutation):
         author_id = gp.ID(default_value=False) #should delete this and cascade changes of user id
         title = gp.String(default_value=False)
         description = gp.String(default_value=False)
-        urls = gp.String(default_value=False)
-        #background_gradient = gp.String(default_value=False)
 
     Output = Book
 
-    def mutate(root, info, id,
-            author_id, title, description, urls, background_gradient):
-        statement = "select * from books where id = '{}'".format(id)
-        
-        cursor = db.connection.cursor()
-        cursor.execute(statement)
-        record = cursor.fetchone()
+    def mutate(root, info, id, author_id, title, description):
+        db_session = db.session()
+
+        record_query = db_session.query(models.Book).filter(models.Book.id == id)
+
+        record = record_query.first()
+
+        if record == None:
+            abort(404, description='Record Not Found')
+
+
+        updated_record = {}
+        if author_id:
+            updated_record['author_id'] = author_id
 
         if title:
-            record['title'] = title
+            updated_record['title'] = title
 
         if description:
-            record['description'] = description
+            updated_record['description'] = description
 
-        if urls:
-            record['urls'] = urls
+        updated_record['modified_at'] = datetime.utcnow()
+        record_query.update(updated_record, synchronize_session=False)
+        db_session.commit()
+        updated_record = record_query.first()
+        db_session.close()
 
-        if background_gradient:
-            record['background_gradient'] = background_gradient
-
-        update_statement = """UPDATE books
-        SET
-            title = %s,
-            description = %s,
-            urls = %s,
-            background_gradient = %s,
-            moddate = CURRENT_TIMESTAMP()
-        WHERE id = %s 
-        """
-
-        updates = (
-            record['title'], record['description'],
-            record['urls'], record['background_gradient'],
-            record['id']
-        )
-
-        cursor.execute(update_statement, updates)
-        db.connection.commit()
-        return record
+        return updated_record
 
 class DeleteBook(gp.Mutation):
     class Arguments:
         id = gp.ID(required=True)
 
-    Output = Book
+    Output = DeleteBookObject
 
 
     def mutate(root, info, id):
-        cursor = db.connection.cursor()
-        statement = "select * from books where id = '{}'".format(id)
-        cursor.execute(statement)
-        record = cursor.fetchone()
+        db_session = db.session()
 
-        delete_statement = "DELETE FROM books WHERE id = '{}' ".format(id)
+        record_query = db_session.query(models.Book).filter(models.Book.id == id)
 
-        cursor = db.connection.cursor()
-        cursor.execute(delete_statement)
-        db.connection.commit()
-        return record
+        record = record_query.first()
+
+        if record == None:
+            abort(404, description='Record Not Found')
+        
+        record_query.delete(synchronize_session=False)
+        db_session.commit()
+        
+        deleted_record = {
+            'status': f'Successfully Deleted Author {id}',
+            'status_code': 200
+        }
+
+        return deleted_record
 
 class Mutation(gp.ObjectType):
     create_book = CreateBook.Field()
@@ -137,5 +136,5 @@ class Mutation(gp.ObjectType):
 
 schema = gp.Schema(
     query=Query,
-    mutation=Mutation, 
+    mutation=Mutation,
     )
