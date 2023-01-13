@@ -1,18 +1,17 @@
 import graphene as gp
-from src import db
+from src import db, models
 from secrets import token_hex
 
 class Book(gp.ObjectType):
     id = gp.ID(required=True)
-    user_id = gp.ID(required=True)
+    author_id = gp.ID(required=True)
     title = gp.String()
     description  = gp.String()
-    urls = gp.List(gp.String)
-    background_gradient = gp.String(default_value='none')
+    # urls = gp.List(gp.String)
+    # background_gradient = gp.String(default_value='none')
 
-    moddate = gp.Date()
-    upldate = gp.Date()
-
+    created_at = gp.Date()
+    modified_at = gp.Date()
 
 class Query(gp.ObjectType):
     book = gp.Field(Book)
@@ -20,59 +19,51 @@ class Query(gp.ObjectType):
     allbooks = gp.List(Book)
 
     def resolve_book_by_id(root, info, id):
-        cursor = db.connection.cursor()
-        statement = "select * from books where id = '{}'".format(id)
-        cursor.execute(statement)
-        record = cursor.fetchone()
+        db_session = db.session()
+        record = db_session.query(models.Book).filter(models.Book.id == id).first()
+        db_session.close()
         return record
 
 
     def resolve_allbooks(root, info):
-        cursor = db.connection.cursor()
-
-        statement = "select * from books"
-        cursor.execute(statement)
-
-        records = cursor.fetchall()
-
+        db_session = db.session()
+        records = db_session.query(models.Book).all()
+        db_session.close()
         return records
+
+
 
 class CreateBook(gp.Mutation):
     class Arguments:
-        user_id = gp.ID(required=True)
-        title = gp.String()
+        author_id = gp.ID(required=True)
+        title = gp.String(required=True)
         description = gp.String()
-        urls = gp.List(gp.String)
 
     Output = Book
 
-    def mutate(root, info, user_id,
-                title, description, urls):
-        insert_statement = """ INSERT INTO books
-            (id, user_id, title, description, urls)
-        VALUES
-            (%s, %s, %s, %s, %s)
-        """
+    def mutate(root, info, author_id,
+                title, description):
 
-        new_token = token_hex(8)
+        book_dict = {
+            'author_id' : author_id,
+            'title' : title,
+            'description' : description,
+        }
 
-        insertions = (new_token, user_id, title,
-                description, urls)
+        new_book = models.Book(**book_dict)
 
-        cursor = db.connection.cursor()
-        cursor.execute(insert_statement, insertions)
-        db.connection.commit()
+        db_session = db.session()
+        db_session.add(new_book)
+        db_session.commit()
+        db_session.refresh(new_book)
+        db_session.close()
 
-        check_statement = "select * from books where id = '{}'".format(id)
-        cursor.execute(check_statement)
-        new_record = cursor.fetchone()
-
-        return new_record
+        return new_book
 
 class UpdateBook(gp.Mutation):
     class Arguments:
         id = gp.ID(required=True)
-        user_id = gp.ID(default_value=False) #should delete this and cascade changes of user id
+        author_id = gp.ID(default_value=False) #should delete this and cascade changes of user id
         title = gp.String(default_value=False)
         description = gp.String(default_value=False)
         urls = gp.String(default_value=False)
@@ -81,7 +72,7 @@ class UpdateBook(gp.Mutation):
     Output = Book
 
     def mutate(root, info, id,
-            user_id, title, description, urls, background_gradient):
+            author_id, title, description, urls, background_gradient):
         statement = "select * from books where id = '{}'".format(id)
         
         cursor = db.connection.cursor()
@@ -148,5 +139,4 @@ class Mutation(gp.ObjectType):
 schema = gp.Schema(
     query=Query,
     mutation=Mutation, 
-    auto_camelcase=False
     )

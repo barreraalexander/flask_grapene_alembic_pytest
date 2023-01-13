@@ -6,13 +6,8 @@ from src import models
 from src.database import engine
 from src.config import settings
 
-# from src.schemas.book import schema as book_schema
-# from src.schemas.user import schema as user_schema
-
-# models.Base.metadata.create_all(bind=engine)
 
 bcrypt = Bcrypt()
-# db = SQLAlchemy()
 db = SQLAlchemy(metadata=models.Base.metadata)
 
 def create_app():
@@ -33,8 +28,8 @@ def create_app():
 
     from src.blueprints.graphql.routes import router as graphql_router
     # from src.schemas.book import schema as book_schema
-    from src.schemas.user import schema as user_schema
-    from src.schemas.author import schema as author_schema
+    # from src.schemas.user import schema as user_schema
+    # from src.schemas.author import schema as author_schema
 
     app.register_blueprint(graphql_router)
     

@@ -1,7 +1,23 @@
 import graphene as gp
-from src import db, bcrypt, models
 from flask import abort
+from src import db, bcrypt, models
 from datetime import datetime
+from pydantic import BaseModel
+
+from pydantic import BaseModel, validator, ValidationError, EmailStr
+from typing import Optional, List
+from datetime import datetime
+
+
+class UserM(BaseModel):
+    id : int
+    name : str
+    email : EmailStr
+    password : str
+    created_at : datetime
+    modified_at : datetime
+    
+
 
 class User(gp.ObjectType):
     id = gp.ID(required=True)
@@ -9,7 +25,7 @@ class User(gp.ObjectType):
     email = gp.String()
     password = gp.String()
     created_at = gp.Date()
-    modified_at = gp.Date()
+    # modified_at = gp.Date()
 
 class DeleteUserObject(gp.ObjectType):
     status_code = gp.Int()
@@ -24,6 +40,9 @@ class Query(gp.ObjectType):
     def resolve_user_by_id(root, info, id):
         db_session = db.session()
         record = db_session.query(models.User).filter(models.User.id == id).first()
+        print (record)
+        print (record.created_at)
+        print (type(record.created_at))
         db_session.close()
         return record
 
@@ -53,7 +72,8 @@ class CreateUser(gp.Mutation):
         user_dict = {
             'name': name,
             'email': email,
-            'password': bcrypt.generate_password_hash(password).decode('utf8')
+            'password': bcrypt.generate_password_hash(password).decode('utf8'),
+
         }
 
         new_user = models.User(**user_dict)
@@ -63,6 +83,12 @@ class CreateUser(gp.Mutation):
         db_session.commit()
         db_session.refresh(new_user)
         db_session.close()
+
+        # print (type(new_user.created_at))
+        # new_user.created_at = new_user.created_at.strftime('%m/%d/%Y')
+
+        # date_time = new_user.created_at.strftime("%d/%m/%Y, %H:%M:%S")
+        # new_user.created_at = date_time
 
         return new_user
 

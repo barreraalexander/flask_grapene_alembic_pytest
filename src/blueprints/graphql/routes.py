@@ -9,17 +9,18 @@ import json
 router = Blueprint('graphql', __name__,
     url_prefix="/graphql")
 
-# @router.route('/book_ep', methods=['POST', 'GET'])
-# def book_ep():
-#     if request.method == "POST":
-#         data = json.loads(request.data)
-#         element = BookSchema.execute(data['query'])
-#         if element.errors:
-#             print (element.errors)
-#             return element.errors
-#             # return RES_DICTS['error']
+
+@router.route('/book_ep', methods=['POST', 'GET'])
+def book_ep():
+    if request.method == "POST":
+        data = json.loads(request.data)
+        element = BookSchema.execute(data['query'])
+        if element.errors:
+            print (element.errors)
+            return element.errors
+            # return RES_DICTS['error']
         
-#     return element.data, 200
+    return element.data, 200
 
 
 @router.route('/user_ep', methods=['POST', 'GET'])
@@ -44,6 +45,5 @@ def author_ep():
             print ('ERROR \n')
             print (element.errors)
             return element.errors
-            # return RES_DICTS['error']
         
     return element.data, 200

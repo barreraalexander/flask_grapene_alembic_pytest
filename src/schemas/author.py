@@ -8,6 +8,9 @@ class Author(gp.ObjectType):
     id = gp.ID(required=True)
     name = gp.String()
     books =  gp.List(Book)
+
+    created_at = gp.Date()
+    modified_at = gp.Date()
     # name
 
 class DeleteAuthorObject(gp.ObjectType):
@@ -33,10 +36,6 @@ class Query(gp.ObjectType):
         return records
 
     
-    # user_by_id = gp.Field(User, id=gp.ID(required=True))
-    # user_by_email = gp.Field(User, email=gp.String(required=True))
-    # allusers = gp.List(User)
-# class Delete
 
 class CreateAuthor(gp.Mutation):
     class Arguments:
