@@ -1,6 +1,7 @@
 # ignore sqlite dbs
 *.db
 progress.txt
+graphql_schema.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
