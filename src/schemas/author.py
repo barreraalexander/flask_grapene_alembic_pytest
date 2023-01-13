@@ -108,12 +108,12 @@ class DeleteAuthor(gp.Mutation):
         record_query.delete(synchronize_session=False)
         db_session.commit()
         
-        deleted_author = {
+        deleted_record = {
             'status': f'Successfully Deleted Author {id}',
             'status_code': 200
         }
 
-        return deleted_author
+        return deleted_record
 
 
 class Mutation(gp.ObjectType):
