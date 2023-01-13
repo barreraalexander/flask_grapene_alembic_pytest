@@ -35,6 +35,7 @@ def create_app():
     
     # app.add_url_rule('/graphiql', view_func=GraphQLView.as_view('graphql', schema=author_schema, graphiql=True))
     # app.add_url_rule('/graphiql', view_func=GraphQLView.as_view('graphql', schema=user_schema, graphiql=True))
+    # app.add_url_rule('/graphql/user_ep', view_func=GraphQLView.as_view('graphql', schema=user_schema, graphiql=True))
     # app.add_url_rule('/author', view_func=GraphQLView.as_view('graphql', schema=author_schema, graphiql=True))
     # print ((db.metadata.tables))
     # db.create_all()

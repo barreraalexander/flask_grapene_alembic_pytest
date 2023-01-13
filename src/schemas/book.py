@@ -1,14 +1,13 @@
 import graphene as gp
 from src import db, models
 from secrets import token_hex
+# from src.s
 
 class Book(gp.ObjectType):
     id = gp.ID(required=True)
     author_id = gp.ID(required=True)
     title = gp.String()
     description  = gp.String()
-    # urls = gp.List(gp.String)
-    # background_gradient = gp.String(default_value='none')
 
     created_at = gp.Date()
     modified_at = gp.Date()
