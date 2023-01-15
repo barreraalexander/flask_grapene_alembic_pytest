@@ -38,20 +38,3 @@ def test_get_book_by_id(client, id, response):
     })
 
     data =  res.json
-
-    # data['bookById'][id] == response
-    # print (type(data['bookById']))
-    # re
-    # assert res. == 200
-    # assert res.status_code == 200
-# def test_get_book(test_client):
-
-#     res = test_client.post("/graphql/book_ep")
-
-
-
-# def test_get_book(test_client):
-
-#     res = test_client.post("/graphql/book_ep")
-
-#     assert res.status_code == 200
