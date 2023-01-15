@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     secret_key: str
     algorithm: str
     access_token_expire_minutes: int
+    sqlalchemy_silence_uber_warning : int = 1
+
 
     debugging: bool = True
 
